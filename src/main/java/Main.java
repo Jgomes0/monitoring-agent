@@ -3,10 +3,13 @@ import oshi.hardware.HardwareAbstractionLayer;
 import oshi.software.os.OperatingSystem;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Properties;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
         System.out.println("Monitoring Agent iniciado!");
 
         // Leitura dos limites a partir do config.properties (src/main/resources)
@@ -32,21 +35,46 @@ public class Main {
         MemoryCollector memoryCollector = new MemoryCollector(hal);
         AlertEngine alertEngine = new AlertEngine(memoryCollector, cpuLimit, memoryLimit); // limites vindos do arquivo
         collector.printBasicInfo();
+        // Integração com SQLite
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:sqlite:monitoring.db")) {
 
-        double cpuLoad;
-        while (true) {
-            try {
-                uptimeCollector.printUptime();
-                cpuLoad = cpuCollector.printCpuinfo();
-                memoryCollector.printMemoryInfo();
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                System.out.println("Monitoramento interrompido");
-                Thread.currentThread().interrupt();
-                break;
+            MetricsRepository repository = new MetricsRepository(connection);
+
+            repository.createTableIfNotExists();
+
+            // Loop de monitoramento
+            while (true) {
+
+                try {
+                    uptimeCollector.printUptime();
+                    double cpuLoad = cpuCollector.printCpuinfo();
+
+                    memoryCollector.printMemoryInfo();
+
+                    // Verificação dos alertas
+                    alertEngine.checkMemory();
+
+                    alertEngine.checkCpu(cpuLoad);
+
+                    // Persistência das métricas
+                    repository.save(
+                            cpuLoad,
+                            memoryCollector.getMemoryUsedPercent()
+                    );
+
+                    Thread.sleep(1000);
+
+                } catch (InterruptedException e) {
+                    System.out.println("Monitoramento interrompido");
+                    Thread.currentThread().interrupt();
+                    break;
+                }
             }
-            alertEngine.checkMemory();
-            alertEngine.checkCpu(cpuLoad);
+
+        } catch (SQLException e) {
+            System.out.println("Erro no banco de dados: " + e.getMessage());
         }
+
     }
 }
