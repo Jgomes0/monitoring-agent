@@ -6,10 +6,11 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.Properties;
 
 public class Main {
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) {
         System.out.println("Monitoring Agent iniciado!");
 
         // Leitura dos limites a partir do config.properties (src/main/resources)
@@ -42,6 +43,16 @@ public class Main {
             MetricsRepository repository = new MetricsRepository(connection);
 
             repository.createTableIfNotExists();
+
+            // existe alguma leitura salva no banco? Se existir, qual foi a última?
+            Optional<Metric> ultima = repository.findLatest();
+            if (ultima.isPresent()) {
+                Metric metric = ultima.get();
+                System.out.printf("Última leitura salva: %s | CPU %.1f%% | Memória %.1f%%%n",
+                        metric.recordedAt(), metric.cpuPercent(), metric.memoryPercent());
+            } else {
+                System.out.println("Nenhuma leitura salva ainda");
+            }
 
             // Loop de monitoramento
             while (true) {
