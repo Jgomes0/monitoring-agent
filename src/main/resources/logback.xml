@@ -1,0 +1,34 @@
+<configuration>
+
+    <!-- Appender = destino das mensagens. DESTINO- CONSOLE -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+
+        <encoder>
+            <!-- Formato de cada linha: data e hora, nível, classe (abreviada) e a mensagem -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{20} - %msg%n</pattern>
+        </encoder>
+    </appender>
+            <!-- DESTINO- SERÁ ESCRITO NO FILE DENTRO DO APPENDER -->
+            <appender  name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>logs/monitoring.log</file>
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <!-- Organiza os arquivos Define nome, data e compactação dos arquivos históricos. -->
+                     <fileNamePattern>logs/monitoring.%d{yyyy-MM-dd}.gz</fileNamePattern>
+                 <maxHistory>30</maxHistory>
+                 </rollingPolicy>
+                 <encoder>
+                     <!--Organiza o conteúdo-->
+                    <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{20} - %msg%n</pattern>
+                </encoder>
+
+            </appender>
+
+    <!-- Nível mínimo que aparece: INFO, WARN e ERROR passam; DEBUG e TRACE ficam de fora -->
+   <root level="INFO">
+       <!-- // destino  -->
+       <appender-ref ref="CONSOLE"/>
+       <!-- // 2 destino, filleappender para rotacionar o arquivo, gerando info diárias  -->
+       <appender-ref ref= "FILE"/>
+   </root>
+
+</configuration>

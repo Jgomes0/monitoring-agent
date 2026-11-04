@@ -1,8 +1,16 @@
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AlertEngine {
+    private static final Logger logger = LoggerFactory.getLogger(AlertEngine.class);
     private double cpuLimit;
     private double memoryLimit;
     private MemoryCollector memoryCollector;
+
+    // Guardam se o alerta de cada métrica está "ligado" no momento.
+    // Cada métrica tem a sua própria flag, para uma não bloquear a outra.
+    private boolean memoryAlertActive = false;
+    private boolean cpuAlertActive = false;
 
     public AlertEngine(MemoryCollector memoryCollector, double cpuLimit, double memoryLimit) {
         this.memoryCollector = memoryCollector;
@@ -12,26 +20,30 @@ public class AlertEngine {
 
     public void checkMemory(){
         double memoryUsedPercent = memoryCollector.getMemoryUsedPercent();
-        if(memoryUsedPercent >= memoryLimit){
-            System.out.println("Alerta, memoria acima do limite");
+        if(  memoryUsedPercent >= memoryLimit && ! memoryAlertActive){
+            logger.warn("Alerta, memoria acima do limite");
+            memoryAlertActive = true;
+        }
+        if (memoryUsedPercent < memoryLimit && memoryAlertActive ){
+            logger.info("Memoria abaixo do limite");
+            memoryAlertActive = false;
         }
     }
 
     public void checkCpu(double load){
-        if(load >= cpuLimit){
-            System.out.println("Alerta, CPU acima do limite");
+        // Mesmo molde do checkMemory: só registra quando o estado MUDA.
+        if (load >= cpuLimit && !cpuAlertActive) {
+            logger.warn("Alerta, CPU acima do limite");
+            cpuAlertActive = true;
+        }
+        if (load < cpuLimit && cpuAlertActive) {
+            logger.info("CPU abaixo do limite");
+            cpuAlertActive = false;
         }
     }
 }
-
 /*
-daí vem o construtor que obriga a entregar um memory collector ao alertengine no momento em que o alertengine nasce
-
-dps vem um metodo checkmemory q retorna void
-q tem uma variavel do tipo double chamado usedpercenet q é = (usamos o metodo do memory collector  pra puxar a porcentagem))
-
-if pra caso esse numero seja maior ou = escrevea o alerta na tela
-
-segundo metodo também void public d nome checkcpu q tem um load do tipo double como parametro.
-caso load seeja maior que o cpu imprime um alerta na tela
+classe feita para mostrar os alertas da cpu e da memoria na tela
+memory colector injetado via construtor
+logger sendo usado para registrar eventos
  */

@@ -8,10 +8,13 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Main {
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
     public static void main(String[] args) {
-        System.out.println("Monitoring Agent iniciado!");
+        logger.info("Monitoring Agent iniciado!");
 
         // Leitura dos limites a partir do config.properties (src/main/resources)
         Properties config = new Properties();
@@ -19,10 +22,11 @@ public class Main {
             if (in != null) {
                 config.load(in); // preenche o mapa chave/valor com o conteúdo do arquivo
             } else {
-                System.out.println("config.properties não encontrado, usando limites padrão");
+                logger.warn("config.properties não encontrado, usando limites padrão");
             }
         } catch (IOException e) {
-            System.out.println("Erro ao ler config.properties, usando limites padrão");
+            // o nível (info, warn, error) define a importância do registro; o e fornece os detalhes da exceção. Você só pode passar e onde essa variável estiver disponível, normalmente dentro do catch correspondente.
+            logger.warn("Erro ao ler config.properties, usando limites padrão", e);
         }
         double cpuLimit = Double.parseDouble(config.getProperty("cpu.limit", "80.0")); // texto -> double, com valor padrão
         double memoryLimit = Double.parseDouble(config.getProperty("memory.limit", "85.0"));
@@ -48,10 +52,14 @@ public class Main {
             Optional<Metric> ultima = repository.findLatest();
             if (ultima.isPresent()) {
                 Metric metric = ultima.get();
-                System.out.printf("Última leitura salva: %s | CPU %.1f%% | Memória %.1f%%%n",
-                        metric.recordedAt(), metric.cpuPercent(), metric.memoryPercent());
+                logger.info(
+                        "Última leitura salva: {} | CPU {}% | Memória {}%",
+                        metric.recordedAt(),
+                        String.format("%.1f", metric.cpuPercent()),
+                        String.format("%.1f", metric.memoryPercent())
+                );
             } else {
-                System.out.println("Nenhuma leitura salva ainda");
+                logger.info("Nenhuma leitura salva ainda");
             }
 
             // Loop de monitoramento
@@ -77,14 +85,14 @@ public class Main {
                     Thread.sleep(1000);
 
                 } catch (InterruptedException e) {
-                    System.out.println("Monitoramento interrompido");
+                    logger.info("Monitoramento interrompido");
                     Thread.currentThread().interrupt();
                     break;
                 }
             }
 
         } catch (SQLException e) {
-            System.out.println("Erro no banco de dados: " + e.getMessage());
+            logger.error("Erro no banco de dados: ", e);
         }
 
     }
