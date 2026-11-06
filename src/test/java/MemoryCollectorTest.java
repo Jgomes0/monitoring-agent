@@ -2,6 +2,7 @@ import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.*;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.hardware.GlobalMemory;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MemoryCollectorTest {
     @Test
@@ -18,7 +19,23 @@ public class MemoryCollectorTest {
         double resultado = memoryCollector.getMemoryUsedPercent();
 
         // ASSERTS
-
+        assertEquals(75.0, resultado, 0.001);
 
     }
+    @Test
+    public void deveExibirInformacoesDeMemoria() {
+
+        HardwareAbstractionLayer hal = mock(HardwareAbstractionLayer.class);
+        GlobalMemory globalMemory = mock(GlobalMemory.class);
+
+        when(hal.getMemory()).thenReturn(globalMemory);
+        when(globalMemory.getTotal()).thenReturn(16000L * 1024 * 1024);
+        when(globalMemory.getAvailable()).thenReturn(4000L * 1024 * 1024);
+
+        MemoryCollector memoryCollector = new MemoryCollector(hal);
+
+        memoryCollector.printMemoryInfo();
+    }
+
+
 }
