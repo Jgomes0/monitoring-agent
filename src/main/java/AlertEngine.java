@@ -9,8 +9,8 @@ public class AlertEngine {
 
     // Guardam se o alerta de cada métrica está "ligado" no momento.
     // Cada métrica tem a sua própria flag, para uma não bloquear a outra.
-    private boolean memoryAlertActive = false;
-    private boolean cpuAlertActive = false;
+    private boolean memoryAlertActive = false; // controlam se um alerta já está ativo
+    private boolean cpuAlertActive = false; // controlam se um alerta já está ativo
 
     public AlertEngine(MemoryCollector memoryCollector, double cpuLimit, double memoryLimit) {
         this.memoryCollector = memoryCollector;

@@ -7,7 +7,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Optional;
-import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,21 +14,9 @@ public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     public static void main(String[] args) {
         logger.info("Monitoring Agent iniciado!");
-
-        // Leitura dos limites a partir do config.properties (src/main/resources)
-        Properties config = new Properties();
-        try (InputStream in = Main.class.getClassLoader().getResourceAsStream("config.properties")) {
-            if (in != null) {
-                config.load(in); // preenche o mapa chave/valor com o conteúdo do arquivo
-            } else {
-                logger.warn("config.properties não encontrado, usando limites padrão");
-            }
-        } catch (IOException e) {
-            // o nível (info, warn, error) define a importância do registro; o e fornece os detalhes da exceção. Você só pode passar e onde essa variável estiver disponível, normalmente dentro do catch correspondente.
-            logger.warn("Erro ao ler config.properties, usando limites padrão", e);
-        }
-        double cpuLimit = Double.parseDouble(config.getProperty("cpu.limit", "80.0")); // texto -> double, com valor padrão
-        double memoryLimit = Double.parseDouble(config.getProperty("memory.limit", "85.0"));
+        AppConfig config = AppConfig.load("config.properties");
+        double cpuLimit = config.getCpuLimit();
+        double memoryLimit = config.getMemoryLimit();
 
         SystemInfo si = new SystemInfo();
         OperatingSystem os = si.getOperatingSystem();
