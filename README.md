@@ -1,8 +1,6 @@
 # Monitoring Agent
 
-Projeto pessoal desenvolvido em Java 17, sem frameworks de aplicação como Spring Boot. Utiliza bibliotecas externas para coleta de informações do sistema, persistência, logging e testes automatizados. Desenvolvido com o objetivo de praticar fundamentos de Java, orientação a objetos, injeção de dependência e organização de uma aplicação backend antes de migrar para Spring Boot.
-
-Projeto pessoal, feito para aprender a estruturar uma aplicação backend em Java puro (sem framework) antes de migrar para o Spring.
+Projeto pessoal desenvolvido em Java 17, sem frameworks de aplicação como Spring Boot. Utiliza bibliotecas externas para coleta de informações do sistema, persistência, logging e testes automatizados. Desenvolvido com o objetivo de praticar fundamentos de Java, orientação a objetos, injeção de dependência e organização de uma aplicação backend.
 
 ## O que ele faz
 
@@ -52,7 +50,7 @@ cd monitoring-agent
 mvn test
 ```
 
-Para executar o monitor, abra o projeto em uma IDE (como o IntelliJ IDEA) e rode a classe `Main`. O arquivo do banco (`monitoring.db`) é criado na pasta de execução, na primeira vez.
+Para executar, abra o projeto em uma IDE (como o IntelliJ IDEA) e rode a classe `Main`. O arquivo do banco (`monitoring.db`) é criado na pasta de execução, na primeira vez.
 
 > Desenvolvido e testado no Windows 11. O OSHI também suporta Linux e macOS, mas o projeto ainda não foi testado neles.
 
@@ -102,12 +100,6 @@ O projeto tem **17 testes automatizados**, executados com `mvn test`:
 - O `AlertEngine` é testado verificando as mensagens de log registradas (nível e texto), inclusive que o alerta não se repete enquanto o limite continua ultrapassado.
 - O `MetricsRepository` é testado com um banco SQLite **em memória**, sem criar arquivo.
 
-## Próximos passos
-
-- Gerar um `.jar` executável, para rodar com `java -jar` sem IDE.
-- Continuar monitorando mesmo se a gravação no banco falhar.
-- Migrar para **Spring Boot** e expor as métricas por uma API REST.
-- Permitir editar a configuração fora do `.jar`.
 
 ## Autor
 
